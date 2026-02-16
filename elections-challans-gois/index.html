@@ -24,21 +24,22 @@ iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAIAAAABc2X6AAAAIGNIUk0AAHomAACAhAAA+gAAAIDoAAB1
     const LOGO_IMPRIMVERT = "/images/image2.png";
 
     const communesData = {
-      "Beauvoir-sur-Mer": { electeurs: 3507, conseillers: 27, circulaires: 3682, bulletins: 7715, grandesAffiches: 4, petitesAffiches: 4 },
-      "Bois-de-Céné": { electeurs: 1672, conseillers: 19, circulaires: 1756, bulletins: 3678, grandesAffiches: 2, petitesAffiches: 2 },
-      "Bouin": { electeurs: 1800, conseillers: 19, circulaires: 1890, bulletins: 3960, grandesAffiches: 6, petitesAffiches: 6 },
-      "Châteauneuf": { electeurs: 955, conseillers: 15, circulaires: 1003, bulletins: 2101, grandesAffiches: 2, petitesAffiches: 2 },
-      "Froidfond": { electeurs: 1512, conseillers: 19, circulaires: 1588, bulletins: 3326, grandesAffiches: 2, petitesAffiches: 2 },
-      "La Garnache": { electeurs: 4579, conseillers: 29, circulaires: 4808, bulletins: 10074, grandesAffiches: 8, petitesAffiches: 8 },
-      "Saint-Christophe-du-Ligneron": { electeurs: 2159, conseillers: 23, circulaires: 2267, bulletins: 4750, grandesAffiches: 2, petitesAffiches: 2 },
-      "Saint-Gervais": { electeurs: 2194, conseillers: 23, circulaires: 2304, bulletins: 4827, grandesAffiches: 2, petitesAffiches: 2 },
-      "Saint-Urbain": { electeurs: 1530, conseillers: 19, circulaires: 1607, bulletins: 3366, grandesAffiches: 2, petitesAffiches: 2 },
-      "Sallertaine": { electeurs: 2636, conseillers: 27, circulaires: 2768, bulletins: 5799, grandesAffiches: 4, petitesAffiches: 4 }
+      "Beauvoir-sur-Mer": { electeurs: 3507, conseillers: 27, ccCandidats: 0, circulaires: 3682, bulletins: 7715, grandesAffiches: 4, petitesAffiches: 4 },
+      "Bois-de-Céné": { electeurs: 1672, conseillers: 19, ccCandidats: 0, circulaires: 1756, bulletins: 3678, grandesAffiches: 2, petitesAffiches: 2 },
+      "Bouin": { electeurs: 1800, conseillers: 19, ccCandidats: 0, circulaires: 1890, bulletins: 3960, grandesAffiches: 6, petitesAffiches: 6 },
+      "Châteauneuf": { electeurs: 955, conseillers: 15, ccCandidats: 0, circulaires: 1003, bulletins: 2101, grandesAffiches: 2, petitesAffiches: 2 },
+      "Froidfond": { electeurs: 1512, conseillers: 19, ccCandidats: 0, circulaires: 1588, bulletins: 3326, grandesAffiches: 2, petitesAffiches: 2 },
+      "La Garnache": { electeurs: 4579, conseillers: 29, ccCandidats: 0, circulaires: 4808, bulletins: 10074, grandesAffiches: 8, petitesAffiches: 8 },
+      "Saint-Christophe-du-Ligneron": { electeurs: 2159, conseillers: 23, ccCandidats: 0, circulaires: 2267, bulletins: 4750, grandesAffiches: 2, petitesAffiches: 2 },
+      "Saint-Gervais": { electeurs: 2194, conseillers: 23, ccCandidats: 0, circulaires: 2304, bulletins: 4827, grandesAffiches: 2, petitesAffiches: 2 },
+      "Saint-Urbain": { electeurs: 1530, conseillers: 19, ccCandidats: 0, circulaires: 1607, bulletins: 3366, grandesAffiches: 2, petitesAffiches: 2 },
+      "Sallertaine": { electeurs: 2636, conseillers: 27, ccCandidats: 0, circulaires: 2768, bulletins: 5799, grandesAffiches: 4, petitesAffiches: 4 }
     };
 
     const TARIFS = {
       circulaires: [{ max: 1000, base: 253.77 }, { max: 10000, base: 253.77, parMille: 24.88 }, { max: Infinity, base: 477.69, parMille: 24.88 }],
-      bulletins: [{ max: 1000, base: 119.40 }, { max: 10000, base: 119.40, parMille: 14.93 }, { max: Infinity, base: 253.77, parMille: 12.94 }],
+      bulletinsA5: [{ max: 1000, base: 119.40 }, { max: 10000, base: 119.40, parMille: 14.93 }, { max: Infinity, base: 253.77, parMille: 12.94 }],
+      bulletinsA4: [{ max: 1000, base: 175.12 }, { max: 10000, base: 175.12, parMille: 18.91 }, { max: 30000, base: 345.31, parMille: 17.91 }, { max: Infinity, base: 703.51, parMille: 14.93 }],
       affichesA1: { base10: 297, uniteSup: 0.29 },
       affichesA3: { base10: 90, uniteSup: 0.12 },
       supplementCouleur: 10
@@ -46,11 +47,13 @@ iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAIAAAABc2X6AAAAIGNIUk0AAHomAACAhAAA+gAAAIDoAAB1
 
     function calculerRemboursement(quantite, tranches) {
       if (quantite <= 0) return 0;
-      const milliers = Math.floor(quantite / 1000) * 1000;
-      for (let t of tranches) {
+      const milliers = Math.ceil(quantite / 1000) * 1000;
+      for (let i = 0; i < tranches.length; i++) {
+        const t = tranches[i];
         if (milliers <= t.max) {
-          if (milliers <= 1000) return t.base;
-          return t.base + Math.floor((milliers - 1000) / 1000) * (t.parMille || 0);
+          if (i === 0) return t.base;
+          const prevMax = tranches[i-1].max;
+          return t.base + Math.floor((milliers - prevMax) / 1000) * (t.parMille || 0);
         }
       }
       return 0;
@@ -74,14 +77,18 @@ iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAIAAAABc2X6AAAAIGNIUk0AAHomAACAhAAA+gAAAIDoAAB1
 
       const remb = useMemo(() => {
         if (!data) return null;
+        const totalNoms = data.conseillers + (data.ccCandidats || 0);
+        const formatBulletin = totalNoms > 31 ? 'A4' : 'A5';
+        const tarifBulletin = formatBulletin === 'A4' ? TARIFS.bulletinsA4 : TARIFS.bulletinsA5;
         const circ = calculerRemboursement(data.circulaires, TARIFS.circulaires);
-        const bull = calculerRemboursement(data.bulletins, TARIFS.bulletins);
+        const bull = calculerRemboursement(data.bulletins, tarifBulletin);
         const affA1 = calculerAffiche(data.grandesAffiches, TARIFS.affichesA1);
         const affA3 = calculerAffiche(data.petitesAffiches, TARIFS.affichesA3);
-        const supp = bulletinCouleur ? Math.floor(data.bulletins / 1000) * TARIFS.supplementCouleur : 0;
+        const suppPrix = formatBulletin === 'A4' ? TARIFS.supplementCouleur * 1.8 : TARIFS.supplementCouleur;
+        const supp = bulletinCouleur ? Math.ceil(data.bulletins / 1000) * suppPrix : 0;
         const totalHT = circ + bull + affA1 + affA3;
         const totalTTC = circ * 1.055 + bull * 1.055 + affA1 * 1.20 + affA3 * 1.20;
-        return { circ, bull, affA1, affA3, supp, totalHT, totalTTC };
+        return { circ, bull, affA1, affA3, supp, totalHT, totalTTC, formatBulletin, totalNoms };
       }, [data, bulletinCouleur]);
 
       const tabStyle = (active) => ({
@@ -176,12 +183,59 @@ iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAIAAAABc2X6AAAAIGNIUk0AAHomAACAhAAA+gAAAIDoAAB1
                     </div>
                   </div>
 
-                  {/* Info enveloppes */}
+                  {/* Info enveloppes de scrutin */}
                   <div style={{ background: '#f0fdfa', borderRadius: '12px', padding: '1rem', marginBottom: '1.5rem', border: '1px solid #99f6e4' }}>
                     <p style={{ margin: 0, color: '#0f766e', fontSize: '0.9rem' }}>
-                      ℹ️ Les <strong>enveloppes de vote</strong> sont fournies par l'État. Vous n'avez rien à prévoir.
+                      \u2709\uFE0F Les <strong>enveloppes de scrutin</strong> (enveloppes dans lesquelles l'électeur glisse son bulletin) sont <strong>fournies par la mairie</strong>. Les listes n'ont rien à prévoir.
                     </p>
                   </div>
+
+                  {/* Info distribution — communes < 2500 hab */}
+                  {data && data.conseillers <= 19 && (
+                    <div style={{ background: '#fff7ed', borderRadius: '16px', padding: '1.25rem', marginBottom: '1.5rem', border: '2px solid #fed7aa' }}>
+                      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
+                        <span style={{ fontSize: '1.5rem' }}>\u{1F4EC}</span>
+                        <div>
+                          <h4 style={{ margin: '0 0 0.5rem 0', color: '#c2410c', fontSize: '1rem' }}>Commune de moins de 2 500 habitants — Distribution à votre charge</h4>
+                          <p style={{ margin: '0 0 0.75rem 0', color: '#9a3412', fontSize: '0.9rem', lineHeight: '1.6' }}>
+                            Dans les communes de moins de 2 500 habitants, la <strong>commission de propagande</strong> existe et contrôle vos documents, mais <strong>elle ne gère pas l'envoi postal aux électeurs</strong> et ne fait pas la mise sous pli.<br/><br/>
+                            <strong>L'envoi de la propagande est à l'initiative et à la charge de chaque liste.</strong> Vous devez prévoir : enveloppes, mise sous pli et affranchissement.
+                          </p>
+
+                          <div style={{ background: '#fff', borderRadius: '12px', padding: '1rem', border: '1px solid #fed7aa', marginBottom: '0.75rem' }}>
+                            <h5 style={{ margin: '0 0 0.5rem 0', color: '#1e293b', fontSize: '0.95rem' }}>\u2709\uFE0F Solution enveloppes proposée par 2D Publicité</h5>
+                            <p style={{ margin: '0 0 0.5rem 0', color: '#475569', fontSize: '0.9rem', lineHeight: '1.6' }}>
+                              <strong>Enveloppes C5 (162 \u00d7 229 mm)</strong> — blanches, 80 g/m\u00B2, certifiées PEFC<br/>
+                              Permet d'insérer : 1 circulaire A4 pliée en 2 + 1 bulletin de vote
+                            </p>
+                            <div style={{ display: 'inline-block', background: '#f0fdfa', padding: '8px 16px', borderRadius: '8px', border: '1px solid #99f6e4' }}>
+                              <strong style={{ color: '#0f766e', fontSize: '1rem' }}>20,00 \u20AC HT la boîte de 500</strong>
+                            </div>
+                            <p style={{ margin: '0.5rem 0 0 0', color: '#b91c1c', fontSize: '0.8rem', fontStyle: 'italic' }}>
+                              Facturation distincte — non soumise au remboursement de l'État
+                            </p>
+                          </div>
+
+                          <div style={{ background: '#f0f9ff', borderRadius: '10px', padding: '0.75rem 1rem', border: '1px solid #bae6fd' }}>
+                            <p style={{ margin: 0, color: '#0c4a6e', fontSize: '0.85rem', lineHeight: '1.5' }}>
+                              \u{1F4CA} <strong>Organisation recommandée du tirage :</strong><br/>
+                              \u2022 <strong>50 %</strong> des bulletins \u2192 pour les bureaux de vote<br/>
+                              \u2022 <strong>50 %</strong> des bulletins \u2192 pour la distribution aux électeurs avec la circulaire
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Info distribution — communes >= 2500 hab */}
+                  {data && data.conseillers > 19 && (
+                    <div style={{ background: '#f0fdf4', borderRadius: '12px', padding: '1rem', marginBottom: '1.5rem', border: '1px solid #bbf7d0' }}>
+                      <p style={{ margin: 0, color: '#166534', fontSize: '0.9rem', lineHeight: '1.6' }}>
+                        \u2705 Commune de 2 500 habitants ou plus : la <strong>commission de propagande</strong> prend en charge l'envoi postal de vos circulaires et bulletins aux électeurs. Vous n'avez qu'à lui remettre vos documents imprimés.
+                      </p>
+                    </div>
+                  )}
                   
                   {/* Info Challans exclue */}
                   <div style={{ background: '#f0f9ff', borderRadius: '12px', padding: '1rem', marginBottom: '1.5rem', border: '1px solid #bae6fd' }}>
@@ -213,7 +267,7 @@ iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAIAAAABc2X6AAAAIGNIUk0AAHomAACAhAAA+gAAAIDoAAB1
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
                         {[
                           { v: formatNumber(data.electeurs), l: 'Électeurs', c: '#3b82f6', bg: '#eff6ff' },
-                          { v: data.conseillers, l: 'Conseillers', c: '#8b5cf6', bg: '#f5f3ff' },
+                          { v: remb.formatBulletin, l: remb.totalNoms + ' noms sur bulletin', c: remb.formatBulletin === 'A4' ? '#ef4444' : '#8b5cf6', bg: remb.formatBulletin === 'A4' ? '#fef2f2' : '#f5f3ff' },
                           { v: formatNumber(data.circulaires), l: 'Circulaires max', c: '#10b981', bg: '#ecfdf5' },
                           { v: formatNumber(data.bulletins), l: 'Bulletins max', c: '#f59e0b', bg: '#fffbeb' }
                         ].map((x, i) => (
@@ -222,6 +276,13 @@ iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAIAAAABc2X6AAAAIGNIUk0AAHomAACAhAAA+gAAAIDoAAB1
                             <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '0.25rem' }}>{x.l}</div>
                           </div>
                         ))}
+                      </div>
+
+                      {/* Info format bulletin */}
+                      <div style={{ background: '#f0f9ff', borderRadius: '12px', padding: '1rem', marginBottom: '1.5rem', border: '1px solid #bae6fd' }}>
+                        <p style={{ margin: 0, color: '#0c4a6e', fontSize: '0.85rem', lineHeight: '1.6' }}>
+                          {'\u{1F4CB}'} <strong>Format du bulletin de vote :</strong> {data.conseillers} <strong>CM</strong> (Conseillers Municipaux) + {data.ccCandidats || 0} <strong>CC</strong> (Candidats Conseillers Communautaires) = <strong>{remb.totalNoms} noms</strong> sur le bulletin {'\u2192'} format <strong>{remb.formatBulletin === 'A4' ? 'A4 (210\u00d7297mm)' : 'A5 (148\u00d7210mm)'}</strong>
+                        </p>
                       </div>
 
                       {/* Option couleur */}
@@ -257,7 +318,7 @@ iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAIAAAABc2X6AAAAIGNIUk0AAHomAACAhAAA+gAAAIDoAAB1
                           <tbody>
                             {[
                               { doc: 'Circulaires A4 R/V', papier: '70g offset PEFC', qty: data.circulaires, tva: '5,5%', ht: remb.circ, ttc: remb.circ * 1.055 },
-                              { doc: `Bulletins A5 ${bulletinCouleur ? '(couleur)' : '(noir)'}`, papier: '70g offset PEFC', qty: data.bulletins, tva: '5,5%', ht: remb.bull, ttc: remb.bull * 1.055 },
+                              { doc: `Bulletins ${remb.formatBulletin} ${bulletinCouleur ? '(couleur)' : '(noir)'}`, papier: '70g offset PEFC', qty: data.bulletins, tva: '5,5%', ht: remb.bull, ttc: remb.bull * 1.055 },
                               { doc: 'Affiches A1', papier: '135g dos bleu PEFC', qty: data.grandesAffiches, tva: '20%', ht: remb.affA1, ttc: remb.affA1 * 1.20 },
                               { doc: 'Affiches A3', papier: '130g CB PEFC', qty: data.petitesAffiches, tva: '20%', ht: remb.affA3, ttc: remb.affA3 * 1.20 }
                             ].map((row, i) => (
@@ -270,22 +331,22 @@ iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAIAAAABc2X6AAAAIGNIUk0AAHomAACAhAAA+gAAAIDoAAB1
                                 <td style={{ padding: '14px 16px', borderBottom: '1px solid #e2e8f0', textAlign: 'right', fontWeight: '600' }}>{formatCurrency(row.ttc)}</td>
                               </tr>
                             ))}
-                            {bulletinCouleur && (
-                              <tr style={{ background: '#fef2f2' }}>
-                                <td colSpan="2" style={{ padding: '14px 16px', borderBottom: '1px solid #fecaca', color: '#b91c1c' }}>⚠️ Supplément couleur (non pris en charge)</td>
-                                <td style={{ padding: '14px 16px', borderBottom: '1px solid #fecaca', textAlign: 'right', color: '#b91c1c' }}>{Math.floor(data.bulletins / 1000)}×10€</td>
-                                <td style={{ padding: '14px 16px', borderBottom: '1px solid #fecaca', textAlign: 'center', color: '#b91c1c' }}>20%</td>
-                                <td style={{ padding: '14px 16px', borderBottom: '1px solid #fecaca', textAlign: 'right', fontWeight: '600', color: '#b91c1c' }}>{formatCurrency(remb.supp)}</td>
-                                <td style={{ padding: '14px 16px', borderBottom: '1px solid #fecaca', textAlign: 'right', fontWeight: '600', color: '#b91c1c' }}>{formatCurrency(remb.supp * 1.20)}</td>
-                              </tr>
-                            )}
                           </tbody>
                           <tfoot>
                             <tr>
-                              <td colSpan="4" style={{ padding: '18px 16px', background: '#0891b2', color: '#fff', fontWeight: '700', borderRadius: '0 0 0 12px' }}>TOTAL REMBOURSEMENT (1 tour)</td>
+                              <td colSpan="4" style={{ padding: '18px 16px', background: '#0891b2', color: '#fff', fontWeight: '700', borderRadius: bulletinCouleur ? '0' : '0 0 0 12px' }}>TOTAL REMBOURSEMENT pris en charge par l'État (1 tour) — sous réserve d'obtenir 5% des suffrages</td>
                               <td style={{ padding: '18px 16px', background: '#0891b2', color: '#fff', textAlign: 'right', fontWeight: '700', fontSize: '1.1rem' }}>{formatCurrency(remb.totalHT)}</td>
-                              <td style={{ padding: '18px 16px', background: '#0891b2', color: '#fff', textAlign: 'right', fontWeight: '700', fontSize: '1.1rem', borderRadius: '0 0 12px 0' }}>{formatCurrency(remb.totalTTC)}</td>
+                              <td style={{ padding: '18px 16px', background: '#0891b2', color: '#fff', textAlign: 'right', fontWeight: '700', fontSize: '1.1rem', borderRadius: bulletinCouleur ? '0' : '0 0 12px 0' }}>{formatCurrency(remb.totalTTC)}</td>
                             </tr>
+                            {bulletinCouleur && (
+                              <tr style={{ background: '#fef2f2' }}>
+                                <td colSpan="2" style={{ padding: '14px 16px', borderTop: '2px solid #fecaca', color: '#b91c1c', borderRadius: '0 0 0 12px' }}>⚠️ Supplément couleur (non pris en charge par l'État)</td>
+                                <td style={{ padding: '14px 16px', borderTop: '2px solid #fecaca', textAlign: 'right', color: '#b91c1c' }}>{Math.ceil(data.bulletins / 1000)}×{formatCurrency(remb.formatBulletin === 'A4' ? TARIFS.supplementCouleur * 1.8 : TARIFS.supplementCouleur)}</td>
+                                <td style={{ padding: '14px 16px', borderTop: '2px solid #fecaca', textAlign: 'center', color: '#b91c1c' }}>20%</td>
+                                <td style={{ padding: '14px 16px', borderTop: '2px solid #fecaca', textAlign: 'right', fontWeight: '600', color: '#b91c1c' }}>{formatCurrency(remb.supp)}</td>
+                                <td style={{ padding: '14px 16px', borderTop: '2px solid #fecaca', textAlign: 'right', fontWeight: '600', color: '#b91c1c', borderRadius: '0 0 12px 0' }}>{formatCurrency(remb.supp * 1.20)}</td>
+                              </tr>
+                            )}
                           </tfoot>
                         </table>
                       </div>
